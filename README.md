@@ -11,13 +11,14 @@
 
 > A Feathers OpenID authentication strategy
 
+**This module is not published yet. It's awaiting further testing and cleanup and will then go out. If you are feeling adventurous you can use it by referencing `feathersjs/feathers-authentication-openid` in your `package.json`.**
+
 ## Installation
 
 ```
 npm install feathers-authentication-openid --save
-```
-**Note:** This module is in development and not officially supported or affiliated with Feathers.js community.
-**Note:** This is only compatibile with `feathers-authentication@1.x` and above.
+``` 
+**Note:** This is only compatible with `feathers-authentication@1.x` and above.
 
 ## Documentation
 
@@ -40,16 +41,17 @@ In most cases initializing the `feathers-authentication-openid` module is as sim
 
 ```js
 const session = require('express-session');
-const TwitterStrategy = require('passport-steam').Strategy;
+const SteamStrategy = require('passport-steam').Strategy;
 app.use(session({ secret: 'super secret', resave: true, saveUninitialized: true }));
 app.configure(authentication(settings));
 app.configure(openid({
   name: 'steam',
   Strategy: SteamStrategy,
-  consumerKey: '<your consumer key>',
-  consumerSecret: '<your consumer secret>'
+  apiKey: '<your consumer key>',
+  realm: '<your domain adress>'
 }));
 ```
+You can get your apiKey from [the steam community website](http://steamcommunity.com/dev/apikey).
 
 This will set up session middleware and authentication pulling from your global `auth` object in your config file. It will also mix in the following defaults, which can be customized.
 
@@ -71,19 +73,38 @@ This will set up session middleware and authentication pulling from your global 
 }
 ```
 
+#### Feathers generator app config
+If you have generated your application using the `feathers-cli` tool, you can add your configuration to the config json
+```json
+{
+  "host": "localhost",
+  "port": 3030,
+  // ....
+  "authentication": {
+    // ...
+    "steam": {
+      "apiKey": "<your api key>",
+      "realm": "<your domain address>",
+      "successRedirect": "/"
+    }
+    // ...
+  }
+}
+```
+
 Additional passport strategy options can be provided based on the OpenID strategy you are configuring.
 
 ### Verifier
 
-This is the verification class that handles the OpenID verification by looking up the entity (normally a `user`) on a given service and either creates or updates the entity and returns them. It has the following methods that can all be overridden. All methods return a promise except `verify`, which has the exact same signature as [passport-oauth1](https://github.com/jaredhanson/passport-oauth1).
+This is the verification class that handles the OpenID verification by looking up the entity (normally a `user`) on a given service and either creates or updates the entity and returns them. It has the following methods that can all be overridden. All methods return a promise except `verify`, which has the exact same signature as [passport-openid](https://github.com/jaredhanson/passport-openid).
 
 ```js
 {
-    constructor(app, options) // the class constructor
-    _updateEntity(entity) // updates an existing entity
-    _createEntity(entity) // creates an entity if they didn't exist already
-    _normalizeResult(result) // normalizes result from service to account for pagination
-    verify(req, accessToken, refreshToken, profile, done) // queries the service and calls the other internal functions.
+    constructor(app, options), // the class constructor
+    _updateEntity(entity), // updates an existing entity
+    _createEntity(entity), // creates an entity if they didn't exist already
+    _normalizeResult(result), // normalizes result from service to account for pagination
+    verify(req, identifier, profile, done) // queries the service and calls the other internal functions.
 }
 ```
 
@@ -99,7 +120,7 @@ import openid, { Verifier } from 'feathers-authentication-openid';
 class CustomVerifier extends Verifier {
   // The verify function has the exact same inputs and
   // return values as a vanilla passport strategy
-  verify(req, accessToken, refreshToken, profile, done) {
+  verify(req, identifier, profile, done) {
     // do your custom stuff. You can call internal Verifier methods
     // and reference this.app and this.options. This method must be implemented.
 
@@ -109,47 +130,47 @@ class CustomVerifier extends Verifier {
 }
 
 app.configure(openid({
-  name: 'steam'
+  name: 'steam',
   Strategy: SteamStrategy,
-  consumerKey: '<your consumer key>',
-  consumerSecret: '<your consumer secret>',
+  apiKey: '<your api key>',
+  realm: '<your domain address>',
   Verifier: CustomVerifier
 }));
 ```
 
 ## Customizing The OpenID Response
 
-Whenever you authenticate with an OAuth1 provider such as Twitter, the provider sends back an `accessToken`, `refreshToken`, and a `profile` that contains the authenticated entity's information based on the OAuth1 `scopes` you have requested and been granted.
+Whenever you authenticate with an OpenID provider such as Steam, the provider sends back an `identifier` and a `profile` that contains the authenticated entity's information.
 
 By default the `Verifier` takes everything returned by the provider and attaches it to the `entity` (ie. the user object) under the provider name. You will likely want to customize the data that is returned. This can be done by adding a `before` hook to both the `update` and `create` service methods on your `entity`'s service.
 
 ```js
-app.configure(oauth1({
-  name: 'twitter',
+app.configure(openid({
+  name: 'steam',
   entity: 'user',
   service: 'users',
   Strategy,
-  consumerKey: '<your consumer key>',
-  consumerSecret: '<your consumer secret>'
+  apiKey: '<your api key>',
+  realm: '<your domain address>'
 }));
 
-function customizeTwitterProfile() {
+function customizeSteamProfile() {
   return function(hook) {
-    console.log('Customizing Twitter Profile');
-    // If there is a twitter field they signed up or
-    // signed in with twitter so let's pull the email. If
-    if (hook.data.twitter) {
-      hook.data.email = hook.data.twitter.email;
+    console.log('Customizing Steam Profile');
+    // If there is a steam field they signed up or
+    // signed in with steam so let's pull the users name.
+    if (hook.data.steam) {
+      hook.data.fullname = hook.data.steam.realname;
     }
 
-    // If you want to do something whenever any OAuth
+    // If you want to do something whenever any OpenID
     // provider authentication occurs you can do this.
-    if (hook.params.oauth) {
-      // do something for all OAuth providers
+    if (hook.params.openid) {
+      // do something for all OpenID providers
     }
 
-    if (hook.params.oauth.provider === 'twitter') {
-      // do something specific to the twitter provider
+    if (hook.params.openid.provider === 'steam') {
+      // do something specific to the steam provider
     }
 
     return Promise.resolve(hook);
@@ -159,17 +180,17 @@ function customizeTwitterProfile() {
 
 app.service('users').hooks({
   before: {
-    create: [customizeTwitterProfile()],
-    update: [customizeTwitterProfile()]
+    create: [customizeSteamProfile()],
+    update: [customizeSteamProfile()]
   }
 });
 ```
 
 ## Complete Example
 
-Here's a basic example of a Feathers server that uses `feathers-authentication-oauth1`. You can see a fully working example in the [example/](./example/) directory.
+Here's a basic example of a Feathers server that uses `feathers-authentication-openid`. You can see a fully working example in the [example/](./example/) directory.
 
-**Note:** You must setup some session middleware. OAuth1 strategies rely on sessions in order to authenticate.
+**Note:** You must setup some session middleware. OpenID strategies rely on sessions in order to authenticate.
 
 ```js
 const feathers = require('feathers');
@@ -178,10 +199,10 @@ const hooks = require('feathers-hooks');
 const memory = require('feathers-memory');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const TwitterStrategy = require('passport-twitter').Strategy;
+const SteamStrategy = require('passport-steam').Strategy;
 const errorHandler = require('feathers-errors/handler');
 const auth = require('feathers-authentication');
-const oauth1 = require('feathers-authentication-oauth1');
+const openid = require('feathers-authentication-openid');
 
 // Initialize the application
 const app = feathers()
@@ -190,15 +211,15 @@ const app = feathers()
   // Needed for parsing bodies (login)
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true }))
-  // set up session support. This is required for OAuth1 strategies
+  // set up session support. This is required for OpenID strategies
   .use(session({ secret: 'super secret', resave: true, saveUninitialized: true }))
   // Configure feathers-authentication
   .configure(auth({ secret: 'super secret' }))
-  .configure(oauth1({
-    name: 'twitter',
-    Strategy: TwitterStrategy,
-    consumerKey: '<your consumer key>',
-    consumerSecret: '<your consumer secret>'
+  .configure(openid({
+    name: 'steam',
+    Strategy: SteamStrategy,
+    apiKey: '<your api key>',
+    realm: '<your domain address>'
   }))
   .use('/users', memory())
   .use(errorHandler());
