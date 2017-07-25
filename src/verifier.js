@@ -74,16 +74,13 @@ class OpenIDVierifier {
   }
 
   verify (req, identifier, profile, done) {
-    console.log('identifier', Util.inspect(identifier));
-    console.log('profile', Util.inspect(profile));
-    console.log('options', Util.inspect(this.options));
     debug('Checking credentials');
     const options = this.options;
     const query = {
       [options.idField]: profile.id, // steamId: profile.id
       $limit: 1
     };
-    const data = { profile: profile._json, identifier };
+    const data = { profile, identifier };
     let existing;
 
     // Check request object for an existing entity

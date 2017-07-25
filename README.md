@@ -6,7 +6,7 @@
 [![Code Climate](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/badges/gpa.svg)](https://codeclimate.com/github/feathersjs/feathers-authentication-openid)
 [![Test Coverage](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/badges/coverage.svg)](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/coverage)
 [![Dependency Status](https://img.shields.io/david/feathersjs/feathers-authentication-openid.svg?style=flat-square)](https://david-dm.org/feathersjs/feathers-authentication-openid)
-[![Download Status](https://img.shields.io/npm/dm/feathers-authentication-oauth1.svg?style=flat-square)](https://www.npmjs.com/package/feathers-authentication-openid)
+[![Download Status](https://img.shields.io/npm/dm/feathers-authentication-openid.svg?style=flat-square)](https://www.npmjs.com/package/feathers-authentication-openid)
 [![Slack Status](http://slack.feathersjs.com/badge.svg)](http://slack.feathersjs.com)
 
 > A Feathers OpenID authentication strategy
@@ -26,7 +26,7 @@ Please refer to the [feathers-authentication-openid documentation](http://docs.f
 
 ## Supported Strategies
 
-There aren't a ton of OpenID strategies anymore as most have moved to OAuth2, however this will work for any [Passport OpenId strategy](http://passportjs.org/). Most notably [Steam](https://github.com/liamcurry/passport-steam).
+There aren't a ton of OpenID strategies anymore as most have moved to OAuth2, however this will work for any [Passport OpenID strategy](http://passportjs.org/). Most notably [Steam](https://github.com/liamcurry/passport-steam).
 
 ## API
 
@@ -59,15 +59,15 @@ This will set up session middleware and authentication pulling from your global 
 
 ```js
 {
-    idField: '<provider>Id', // The field to look up the entity by when logging in with the provider. Defaults to '<provider>Id' (ie. 'twitterId').
+    idField: '<provider>Id', // The field to look up the entity by when logging in with the provider. Defaults to '<provider>Id' (ie. 'steamId').
     path: '/auth/<provider>', // The route to register the middleware
     returnPath: '/auth/<provider>/callback', // The route to register the callback handler
-    returnURL: 'http(s)://hostame[:port]/auth/<provider>/return', // The callback url. Will automatically take into account your host and port and whether you are in production based on your app environment to construct the url. (ie. in development http://localhost:3030/auth/twitter/callback)
+    returnURL: 'http(s)://hostame[:port]/auth/<provider>/return', // The callback url. Will automatically take into account your host and port and whether you are in production based on your app environment to construct the url. (ie. in development http://localhost:3030/auth/steam/return)
     entity: 'user', // the entity that you are looking up
     service: 'users', // the service to look up the entity
     passReqToCallback: true, // whether the request object should be passed to `verify`
     session: true // whether to use sessions,
-    handler: function, // Express middleware for handling the oauth callback. Defaults to the built in middleware.
+    handler: function, // Express middleware for handling the openid return. Defaults to the built in middleware.
     formatter: function, // The response formatter. Defaults the the built in feathers-rest formatter, which returns JSON.
     Verifier: Verifier // A Verifier class. Defaults to the built-in one but can be a custom one. See below for details.
 }
