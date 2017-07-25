@@ -4,10 +4,10 @@ var hooks = require('feathers-hooks');
 var memory = require('feathers-memory');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var TwitterStrategy = require('passport-twitter').Strategy;
+var SteamStrategy = require('passport-steam').Strategy;
 var errorHandler = require('feathers-errors/handler');
 var auth = require('feathers-authentication');
-var oauth1 = require('../lib/index');
+var openid = require('../lib/index');
 
 // Initialize the application
 var app = feathers();
@@ -22,22 +22,22 @@ app.configure(rest())
   .use(session({ secret: 'super secret', resave: true, saveUninitialized: true }))
   // Configure feathers-authentication
   .configure(auth({ secret: 'super secret' }))
-  .configure(oauth1({
-    name: 'twitter',
-    Strategy: TwitterStrategy,
-    consumerKey: '<your consumer key>',
-    consumerSecret: '<your consumer secret>'
+  .configure(openid({
+    name: 'steam',
+    Strategy: SteamStrategy,
+    consumerKey: '<your api key>',
+    consumerSecret: '<your domain address>'
   }))
   .use('/users', memory())
   .use(errorHandler());
 
-function customizeTwitterProfile() {
+function customizeSteamProfile() {
   return function(hook) {
-    console.log('Customizing Twitter Profile');
-    // If there is a twitter field they signed up or
-    // signed in with twitter so let's pull the email
-    if (hook.data.twitter) {
-      hook.data.email = hook.data.twitter.email;
+    console.log('Customizing Steam Profile');
+    // If there is a steam field they signed up or
+    // signed in with steam so let's pull the users avatar
+    if (hook.data.steam) {
+      hook.data.avatar = hook.data.steam._json.avatar;
     }
 
     return Promise.resolve(hook);
@@ -59,11 +59,11 @@ app.service('authentication').hooks({
 // the password with a hash of the password before saving it.
 app.service('users').hooks({
   before: {
-    create: [customizeTwitterProfile()],
-    update: [customizeTwitterProfile()]
+    create: [customizeSteamProfile()],
+    update: [customizeSteamProfile()]
   }
 });
 
 app.listen(app.get('port'));
 
-console.log('Feathers authentication with oauth1 auth started on 127.0.0.1:3030');
+console.log('Feathers authentication with openid auth started on 127.0.0.1:3030');
