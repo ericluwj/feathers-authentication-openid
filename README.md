@@ -1,17 +1,8 @@
 # feathers-authentication-openid
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/feathersjs/feathers-authentication-openid.svg)](https://greenkeeper.io/)
-
-[![Build Status](https://travis-ci.org/feathersjs/feathers-authentication-openid.png?branch=master)](https://travis-ci.org/feathersjs/feathers-authentication-openid)
-[![Code Climate](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/badges/gpa.svg)](https://codeclimate.com/github/feathersjs/feathers-authentication-openid)
-[![Test Coverage](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/badges/coverage.svg)](https://codeclimate.com/github/feathersjs/feathers-authentication-openid/coverage)
-[![Dependency Status](https://img.shields.io/david/feathersjs/feathers-authentication-openid.svg?style=flat-square)](https://david-dm.org/feathersjs/feathers-authentication-openid)
-[![Download Status](https://img.shields.io/npm/dm/feathers-authentication-openid.svg?style=flat-square)](https://www.npmjs.com/package/feathers-authentication-openid)
-[![Slack Status](http://slack.feathersjs.com/badge.svg)](http://slack.feathersjs.com)
-
 > A Feathers OpenID authentication strategy
 
-**This module is not published yet. It's awaiting further testing and cleanup and will then go out. If you are feeling adventurous you can use it by referencing `feathersjs/feathers-authentication-openid` in your `package.json`.**
+__This module was expiremental and is no longer under active development__
 
 ## Installation
 
