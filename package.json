@@ -1,7 +1,7 @@
 {
   "name": "feathers-authentication-openid",
   "description": "A Feathers OpenID authentication strategy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/feathersjs/feathers-authentication-openid",
   "main": "lib/",
   "keywords": [
